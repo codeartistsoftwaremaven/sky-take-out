@@ -1,5 +1,6 @@
 package com.sky.controller.user;
 
+import com.alibaba.fastjson.JSON;
 import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.UserLoginDTO;
 import com.sky.entity.User;
@@ -39,13 +40,14 @@ public class UserController {
         User user=userService.wxLogin(userLoginDTO);
         Map<String,Object> claims=new HashMap<>();
         claims.put(JwtClaimsConstant.USER_ID,user.getId());
-        String token=JwtUtil.createJWT(jwtProperties.getAdminSecretKey(),jwtProperties.getUserTtl(),claims);
+        String token=JwtUtil.createJWT(jwtProperties.getUserSecretKey(),jwtProperties.getUserTtl(),claims);
 
         UserLoginVO userLoginVO=UserLoginVO.builder()
                 .id(user.getId())
                 .openid(user.getOpenid())
                 .token(token)
                 .build();
+        log.info("登录成功，返回响应：{}", JSON.toJSONString(userLoginVO)); // 打印响应，确认格式正确
         return Result.success(userLoginVO);
     }
 }

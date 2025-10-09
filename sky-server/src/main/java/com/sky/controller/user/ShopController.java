@@ -6,10 +6,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController("userShopController")
@@ -22,7 +19,7 @@ public class ShopController {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    @PutMapping("/status")
+    @GetMapping("/status")
     @ApiOperation("获取店铺的营业状态")
     public Result<Integer> getStatus(){
         Integer shopStatus =(Integer) redisTemplate.opsForValue().get(KEY);

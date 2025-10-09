@@ -55,8 +55,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         //密码比对
-        //对前端传过来的明文密码进行md5加密再进行比对
-        password=DigestUtils.md5DigestAsHex(password.getBytes());
+        //对前端传过来的明文密码进行md5加密再进行比对（显式使用UTF-8）
+        password=DigestUtils.md5DigestAsHex(password.getBytes(StandardCharsets.UTF_8));
 
         if (!password.equals(employee.getPassword())) {
             //密码错误
@@ -77,7 +77,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee=new Employee();
         BeanUtils.copyProperties(employeeDTO,employee);
         employee.setStatus(StatusConstant.ENABLE);
-        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
+        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes(StandardCharsets.UTF_8)));
        /* employee.setCreateTime(LocalDateTime.now());
         employee.setUpdateTime(LocalDateTime.now());
 

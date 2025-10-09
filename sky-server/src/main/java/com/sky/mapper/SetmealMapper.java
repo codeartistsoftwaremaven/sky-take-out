@@ -23,4 +23,7 @@ public interface SetmealMapper {
     @Select("select sd.name, sd.copies, d.image, d.description from setmeal_dish sd inner join dish d on sd.setmeal_id = d.id " +
             "where sd.setmeal_id = #{setmealId}")
     List<DishItemVO> getDishItemBySetmealId(Long id);
+
+    @Select("SELECT * FROM setmeal WHERE id = #{setmealId}")
+    Setmeal getById(Long setmealId);
 }
