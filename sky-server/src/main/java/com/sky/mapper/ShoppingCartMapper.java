@@ -17,7 +17,7 @@ public interface ShoppingCartMapper {
     void update(ShoppingCart cart);
 
     @Insert("insert into shopping_cart(name, user_id, dish_id, setmeal_id, dish_flavor, amount, image,create_time) " +
-            "values(#{name},#{userId},#{setmealId},#{dishFlavor},#{number},#{amount},#{image},#{createTime})")
+            "values(#{name},#{userId},#{dishId},#{setmealId},#{dishFlavor},#{amount},#{image},#{createTime})")
     void insert(ShoppingCart shoppingCart);
 
     @Delete("delete from shopping_cart where user_id=#{userId}")
