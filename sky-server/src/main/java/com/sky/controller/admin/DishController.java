@@ -82,4 +82,11 @@ public class DishController {
         redisTemplate.delete(keys);
     }
 
+    @GetMapping("/list")
+    @ApiOperation("根据分类id查询菜品")
+    public Result<List<Dish>> list(Long categoryId){
+        log.info("根据分类{}查询",categoryId);
+        List<Dish> dishList=dishService.list(categoryId);
+        return Result.success(dishList);
+    }
 }

@@ -1,11 +1,15 @@
 package com.sky.controller.user;
 
+import com.sky.dto.HistoryOrderPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
+import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController("userOrderController")
 @RequestMapping("/user/order")
 @Slf4j
-@ApiOperation("用户端订单相关接口")
+@Api("用户端订单相关接口")
 public class OrderController {
 
     @Autowired
@@ -43,4 +47,37 @@ public class OrderController {
         orderService.paySuccess(ordersPaymentDTO.getOrderNumber());
         return Result.success(orderPaymentVO);
     }
+
+    @GetMapping("/historyOrders")
+    @ApiOperation("用户端历史订单查询")
+    public Result<PageResult> page(HistoryOrderPageQueryDTO historyOrderPageQueryDTO){
+        log.info("历史订单查询，{}",historyOrderPageQueryDTO);
+        PageResult pageResult=orderService.pageQuery(historyOrderPageQueryDTO);
+        return Result.success(pageResult);
+    }
+
+    @GetMapping("/orderDetail/{id}")
+    @ApiOperation("查询订单详情")
+    public Result<OrderVO> details(@PathVariable Long id){
+        log.info("查询订单详情，订单id为{}",id);
+        OrderVO orderVO=orderService.details(id);
+        return Result.success(orderVO);
+    }
+
+    @PutMapping("/cancel/{id}")
+    @ApiOperation("取消订单")
+    public Result cancel(@PathVariable Long id) throws Exception {
+        log.info("取消订单，订单id为{}",id);
+        orderService.userCancelById(id);
+        return Result.success();
+    }
+
+    @PostMapping("/repetition/{id}")
+    @ApiOperation("再来一单")
+    public Result repetition(@PathVariable Long id){
+        log.info("再来一单，订单id为{}",id);
+        orderService.repetition(id);
+        return Result.success();
+    }
+
 }

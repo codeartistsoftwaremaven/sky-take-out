@@ -39,6 +39,24 @@ public class SetmealServiceImpl implements SetmealService {
     @Autowired
     private DishMapper dishMapper;
 
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        if(status==StatusConstant.ENABLE){
+            List<Dish> dishList=dishMapper.getBySetmealId(id);
+            for (Dish dish : dishList) {
+                if(dish.getStatus()==StatusConstant.DISABLE){
+                    throw new SetmealEnableFailedException(MessageConstant.SETMEAL_ENABLE_FAILED);
+                }
+            }
+        }
+
+        Setmeal setmeal=Setmeal.builder()
+                .id(id)
+                .status(status)
+                .build();
+        setmealMapper.update(setmeal);
+    }
+
     /**
      * 条件查询
      * @param setmeal
@@ -56,5 +74,69 @@ public class SetmealServiceImpl implements SetmealService {
      */
     public List<DishItemVO> getDishItemById(Long id) {
         return setmealMapper.getDishItemBySetmealId(id);
+    }
+
+    @Transactional
+    @Override
+    public void saveWithDish(SetmealDTO setmealDTO) {
+        Setmeal setmeal=new Setmeal();
+        BeanUtils.copyProperties(setmealDTO,setmeal);
+        setmealMapper.insert(setmeal);
+
+        Long setmealId = setmeal.getId();
+        List<SetmealDish> setmealDishes=setmealDTO.getSetmealDishes();
+        for (SetmealDish setmealDish : setmealDishes) {
+            setmealDish.setDishId(setmealId);
+        }
+
+        setmealDishMapper.insertBatch(setmealDishes);
+    }
+
+    @Override
+    public PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO) {
+        PageHelper.startPage(setmealPageQueryDTO.getPage(),setmealPageQueryDTO.getPageSize());
+        Page<SetmealVO> page=setmealMapper.pageQuery(setmealPageQueryDTO);
+        return new PageResult(page.getTotal(),page.getResult());
+    }
+
+    @Override
+    public void deleteBatch(List<Long> ids) {
+        for (Long id : ids) {
+            Setmeal setmeal=setmealMapper.getById(id);
+            if(setmeal.getStatus()==StatusConstant.ENABLE){
+                throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ON_SALE);
+            }
+        }
+
+        for (Long id : ids) {
+            setmealMapper.deleteById(id);
+            setmealDishMapper.deleteBySetmealId(id);
+        }
+    }
+
+    @Override
+    public SetmealVO getByIdWithDish(Long id) {
+        Setmeal setmeal=setmealMapper.getById(id);
+        List<SetmealDish> setmealDishes=setmealDishMapper.getBySetmealId(id);
+        SetmealVO setmealVO=new SetmealVO();
+        BeanUtils.copyProperties(setmeal,setmealVO);
+        setmealVO.setSetmealDishes(setmealDishes);
+        return setmealVO;
+    }
+
+    @Override
+    public void update(SetmealDTO setmealDTO) {
+        Setmeal setmeal=new Setmeal();
+        BeanUtils.copyProperties(setmealDTO,setmeal);
+        setmealMapper.update(setmeal);
+
+        setmealDishMapper.deleteBySetmealId(setmealDTO.getId());
+        List<SetmealDish> setmealDishes=setmealDTO.getSetmealDishes();
+        if(setmealDishes!=null && setmealDishes.size()>0){
+            for (SetmealDish setmealDish : setmealDishes) {
+                setmealDish.setSetmealId(setmealDTO.getId());
+            }
+            setmealDishMapper.insertBatch(setmealDishes);
+        }
     }
 }

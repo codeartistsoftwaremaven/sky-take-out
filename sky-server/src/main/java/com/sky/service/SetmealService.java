@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface SetmealService {
 
+    void startOrStop(Integer status, Long id);
+
     /**
      * 条件查询
      * @param setmeal
@@ -24,4 +26,13 @@ public interface SetmealService {
      */
     List<DishItemVO> getDishItemById(Long id);
 
+    void saveWithDish(SetmealDTO setmealDTO);
+
+    PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO);
+
+    void deleteBatch(List<Long> ids);
+
+    SetmealVO getByIdWithDish(Long id);
+
+    void update(SetmealDTO setmealDTO);
 }
