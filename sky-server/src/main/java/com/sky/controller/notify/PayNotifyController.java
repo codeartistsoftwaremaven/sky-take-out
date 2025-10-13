@@ -3,8 +3,12 @@ package com.sky.controller.notify;
 import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sky.context.BaseContext;
+import com.sky.entity.Orders;
+import com.sky.mapper.OrderMapper;
 import com.sky.properties.WeChatProperties;
 import com.sky.service.OrderService;
+import com.sky.websocket.WebSocketServer;
 import com.wechat.pay.contrib.apache.httpclient.util.AesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
@@ -15,7 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 支付回调相关接口
@@ -28,6 +34,10 @@ public class PayNotifyController {
     private OrderService orderService;
     @Autowired
     private WeChatProperties weChatProperties;
+    @Autowired
+    private WebSocketServer webSocketServer;
+    @Autowired
+    private OrderMapper orderMapper;
 
     /**
      * 支付成功回调
@@ -113,5 +123,28 @@ public class PayNotifyController {
         response.setHeader("Content-type", ContentType.APPLICATION_JSON.toString());
         response.getOutputStream().write(JSONUtils.toJSONString(map).getBytes(StandardCharsets.UTF_8));
         response.flushBuffer();
+    }
+
+    public void paySuccess(String outTradeNo) {
+        Long userId= BaseContext.getCurrentId();
+        Orders ordersDB=orderMapper.getByNumberAndUserId(outTradeNo,userId);
+
+        Orders orders=Orders.builder()
+                .id(ordersDB.getId())
+                .status(Orders.TO_BE_CONFIRMED)
+                .payStatus(Orders.PAID)
+                .checkoutTime(LocalDateTime.now())
+                .build();
+
+        orderMapper.update(orders);
+
+        Map map=new HashMap();
+        map.put("type",1);
+        map.put("orderId",ordersDB.getId());
+        map.put("content","订单号："+outTradeNo);
+        String json=JSON.toJSONString(map);
+
+        webSocketServer.sendToAllClient(json);
+        log.info("来单提醒：{}",json);
     }
 }
