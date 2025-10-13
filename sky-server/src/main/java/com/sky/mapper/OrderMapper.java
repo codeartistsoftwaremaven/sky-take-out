@@ -38,4 +38,9 @@ public interface OrderMapper {
 
     @Select("select * from orders where status=#{status} and order_time<#{orderTime}")
     List<Orders> getByStatusAndOrderTimeLT(Integer status, LocalDateTime orderTime);
+
+    @Select("SELECT * FROM orders \n" +
+            "WHERE number = #{outTradeNo} \n" +
+            "  AND user_id = #{userId}")
+    Orders getByNumberAndUserId(String outTradeNo, Long userId);
 }

@@ -34,7 +34,7 @@ public class OrderTask {
         }
     }
 
-    @Scheduled(cron = "0 0 1 * * ?")
+      @Scheduled(cron = "0 0 1 * * ?")
     //@Scheduled(cron = "0/5 * * * * ?")
     public void processDeliveryOrder(){
         log.info("定时处理处于派送状态的订单：{}", LocalDateTime.now());
