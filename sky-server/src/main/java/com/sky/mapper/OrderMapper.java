@@ -46,4 +46,6 @@ public interface OrderMapper {
     Orders getByNumberAndUserId(String outTradeNo, Long userId);
 
     Double sumByMap(Map map);
+
+    Integer countByMap(Map map);
 }
